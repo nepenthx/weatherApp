@@ -1,4 +1,5 @@
 package com.example.composeweb
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -6,56 +7,55 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.LocalDate
-import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.composeweb.data.WeatherInfo
 import com.example.composeweb.logic.WeatherViewModel
-import androidx.compose.foundation.lazy.items
+import java.time.LocalDate
+
 class MainActivity : ComponentActivity() {
     private lateinit var weatherViewModel: WeatherViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            var city="北京"
-            val weatherInfo= remember {
+
+            val city = intent.getStringExtra("cityName") ?: "北京"
+            val weatherInfo = remember {
                 mutableStateOf<WeatherInfo?>(null)
             }
             weatherViewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
             weatherViewModel.getWeatherData()
             weatherViewModel.weatherLiveData.observe(this, Observer { weather ->
-               weatherInfo.value= giveValue(weather)
-                Log.d("MainActivityLogout","main ${weatherInfo.value?.result?.realtime?.info}")
+                weatherInfo.value = giveValue(weather)
+                Log.d("MainActivityLogout", "main ${weatherInfo.value?.result?.realtime?.info}")
 
             })
-            MainUI(weatherInfo.value,city)
-            Log.d("MainActivityLogout","mainUI ${weatherInfo.value?.result?.realtime?.info}")
+            MainUI(weatherInfo.value, city)
+            Log.d("MainActivityLogout", "mainUI ${weatherInfo.value?.result?.realtime?.info}")
             }
     }
 }
-
 fun giveValue(weatherInfo: WeatherInfo? ):WeatherInfo? {
-
     return weatherInfo
 }
-
 @Composable
 fun MainUI(weatherInfo: WeatherInfo? ,city:String){
 
@@ -81,41 +81,64 @@ fun getFutureCard(fu:List<WeatherInfo.Future1>){
 @Composable
 fun CityCard(city:String ) {
     val date = LocalDate.now().toString()
+    val context = LocalContext.current
     Row() {
-        Surface(shape = MaterialTheme.shapes.medium, elevation = 1.dp,
-            modifier = Modifier
-                .size(360.dp, 120.dp)
-                .padding(10.dp)
-        ) {
+        Column() {
             Row() {
-                Image(
-                    painter = painterResource(id = R.drawable.city),
-                    contentDescription = "city",
+                Surface(
+                    shape = MaterialTheme.shapes.medium, elevation = 1.dp,
                     modifier = Modifier
-                        .size(80.dp)
-                )
-                Column() {
-                    Text(
-                        text = city,
-                        modifier = Modifier
-                            .padding(top = 20.dp)
-                            .padding(bottom = 2.dp)
-                            .padding(start = 40.dp),
-                        style = MaterialTheme.typography.body2,
-                        color = Color.Black,
-                        fontSize = 20.sp
-                    )
-                    Text(
-                        text = date,
-                        modifier = Modifier
-                            .padding(top = 2.dp)
-                            .padding(start = 40.dp),
-                        style = MaterialTheme.typography.body2,
-                        color = Color.Black,
-                        fontSize = 20.sp
-                    )
+                        //      .size(360.dp, 120.dp)
+                        .padding(10.dp)
+                        .clickable() {
+                            val intent = Intent(context, CityPickerActivity::class.java)
+                            Log.d("CityPickerActivity","Clicked")
+                            context.startActivity(intent)
+                        }
+                        )
+                 {
+                    cityCardUi(city,date)
                 }
             }
+        }
+        Image(
+            painter = painterResource(id = R.drawable.fck),
+            contentDescription = "city",
+            modifier = Modifier
+                .size(100.dp)
+                .padding(top = 10.dp)
+                .padding(start = 2.dp))
+    }
+}
+@Composable
+fun cityCardUi(city:String,date:String)
+{
+    Row() {
+        Image(
+            painter = painterResource(id = R.drawable.city),
+            contentDescription = "city",
+            modifier = Modifier
+                .size(90.dp)
+        )
+        Column() {
+            Text(
+                text = city,
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .padding(bottom = 2.dp)
+                    .padding(start = 40.dp),
+                style = MaterialTheme.typography.body2,
+                color = Color.Black,
+                fontSize = 20.sp
+            )
+            Text(
+                text = date,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .padding(start = 40.dp),
+                style = MaterialTheme.typography.body2,
+                color = Color.Black,
+                fontSize = 20.sp)
         }
     }
 }
@@ -269,7 +292,7 @@ fun WeatherCard(weatherInfo: WeatherInfo? )
                                 .size(40.dp)
                         )
                         Text(
-                            text = "空气质量: ${weatherInfo?.result?.realtime?.aqi}",
+                            text = "AQI: ${weatherInfo?.result?.realtime?.aqi}",
                             modifier = Modifier
                                 .padding(top = 2.dp)
                                 .padding(start = 2.dp),

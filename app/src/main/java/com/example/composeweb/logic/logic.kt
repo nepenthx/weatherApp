@@ -1,6 +1,9 @@
 package com.example.composeweb.logic
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,7 +28,8 @@ class WeatherViewModel: ViewModel() {
 
     fun getWeatherData() {
         val url = "http://apis.juhe.cn/"
-        val key = ""
+       val key = "4621d831a922538574c424704f83af06"
+       // val key=" "
         val retrofit = Retrofit.Builder()
             .baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create())
