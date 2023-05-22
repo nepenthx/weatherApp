@@ -28,8 +28,8 @@ class WeatherViewModel: ViewModel() {
 
     fun getWeatherData() {
         val url = "http://apis.juhe.cn/"
-       val key = "4621d831a922538574c424704f83af06"
-       // val key=" "
+
+      val key=" "
         val retrofit = Retrofit.Builder()
             .baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create())
